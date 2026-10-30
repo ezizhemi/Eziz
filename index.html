@@ -210,7 +210,7 @@ document.addEventListener("click",function(e){
   else if(t.dataset.buy!==undefined)buyClick(t.dataset.buy);
   else theme();
 });
-var API=""; /* admin API: GET API+"/balance?id=ID&init=..." -> {"balance":12.5} */
+var API="https://eziz.beteziz775.workers.dev/"; /* admin API: GET API+"/balance?id=ID&init=..." -> {"balance":12.5} */
 var tg=window.Telegram&&window.Telegram.WebApp,uid="",bal=0;
 if(tg){try{tg.ready();tg.expand()}catch(e){}}
 var tu=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
