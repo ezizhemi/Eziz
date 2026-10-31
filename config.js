@@ -1,1 +1,1 @@
-window.API_URL="https://eziz.beteziz775.workers.dev/";
+window.API_URL="https://eziz.beteziz775.workers.dev";
