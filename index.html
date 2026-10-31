@@ -126,7 +126,7 @@ button:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
   <div class="feat">
     <div class="card"><div class="ico">⛨</div><b>Howpsuz</b><span>şifrlenen birikme</span></div>
     <div class="card"><div class="ico c2">ϟ</div><b>Derrew</b><span>tölegden soň salgy</span></div>
-    <div class="card"><div class="ico c3">☊</div><b>Goldaw</b><span>Telegram-da</span></div>
+    <div class="card" data-support style="cursor:pointer"><div class="ico c3">☊</div><b>Goldaw</b><span>@krakenxhp</span></div>
   </div>
 
   <div class="card row">
@@ -164,7 +164,7 @@ button:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
   <div class="card prof"><div class="circle logo"></div><div><b style="font-size:19px" data-uname>Myhman</b><br><span style="font-size:14px;color:var(--muted)">ID: <span data-uid></span> · <span data-bal>$0.00</span></span></div></div>
   <div class="card list">
     <div class="item" data-theme-btn><div class="ico c3">◐</div><div><b>Tema</b><span>Ýagty / garaňky</span></div><em>⇄</em></div>
-    <div class="item"><div class="ico c2">☊</div><div><b>Goldaw</b><span>Telegram-da ýazyň</span></div><em>›</em></div>
+    <div class="item" data-support><div class="ico c2">☊</div><div><b>Goldaw</b><span>@krakenxhp</span></div><em>›</em></div>
   </div>
 </section>
 
@@ -215,12 +215,13 @@ function theme(){
   r.dataset.theme=dark?"light":"dark";$("#theme").textContent=dark?"☾":"☀";
 }
 document.addEventListener("click",function(e){
-  var t=e.target.closest("[data-p],[data-tab],[data-buy],[data-theme-btn],[data-add],[data-close],[data-refresh],#theme");if(!t)return;
+  var t=e.target.closest("[data-p],[data-tab],[data-buy],[data-theme-btn],[data-add],[data-close],[data-refresh],[data-support],#theme");if(!t)return;
   if(t.dataset.p){plan=+t.dataset.p;selPlan()}
   else if(t.dataset.tab)go(t.dataset.tab);
   else if(t.dataset.add!==undefined)addFunds();
   else if(t.dataset.close!==undefined)$("#ov").classList.remove("show");
   else if(t.dataset.refresh!==undefined)loadOrders();
+  else if(t.dataset.support!==undefined)support();
   else if(t.dataset.buy!==undefined)buyClick(t.dataset.buy);
   else theme();
 });
@@ -281,6 +282,12 @@ function buyClick(k){
       else if(d.error==="balance")sheet(c);else toast("Ýalňyşlyk ýüze çykdy")
     }).catch(function(){toast("Ýalňyşlyk ýüze çykdy")})
   }else{bal=Math.round((bal-c)*100)/100;showBal();toast(P[plan][0]+" satyn alyndy")}
+}
+function support(){
+  var u="https://t.me/krakenxhp";
+  if(tg&&tg.initData&&tg.openTelegramLink){tg.openTelegramLink(u);return}
+  var w=null;try{w=window.open(u,"_blank")}catch(e){}
+  if(!w){try{location.href="tg://resolve?domain=krakenxhp"}catch(e){}}
 }
 function addFunds(){
   $("#ov").classList.remove("show");
