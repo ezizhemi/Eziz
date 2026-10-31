@@ -76,6 +76,10 @@ h1{font-size:34px;font-weight:800;letter-spacing:-1.2px}
 .cp{margin-top:10px;border:0;background:var(--g);color:#fff;font-weight:700;font-family:inherit;font-size:14px;padding:10px 18px;border-radius:999px;cursor:pointer}
 .inp{width:100%;padding:16px 18px;border-radius:18px;border:1.5px solid var(--line);background:var(--card);color:var(--text);font-size:17px;font-family:inherit;margin:4px 0 12px;outline:none}.inp:focus{border-color:var(--pink)}
 .lbl{font-size:14px;color:var(--muted);margin:10px 2px 2px}
+.stage{position:relative;height:178px;margin:-8px 0 8px;display:grid;place-items:center}.stage canvas{width:178px;height:178px}
+.chip2{position:absolute;left:0;top:2px;display:flex;gap:7px;align-items:center;font-size:12px;font-weight:700;background:rgba(255,255,255,.2);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.4);padding:6px 12px;border-radius:999px}.chip2.r{left:auto;right:0}
+.chip2 i{width:8px;height:8px;border-radius:50%;background:#7cffb2;animation:pl 1.8s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(124,255,178,.7)}70%,100%{box-shadow:0 0 0 8px rgba(124,255,178,0)}}
 .view{display:none}.view.on{display:block}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at 12% 92%,rgba(255,122,61,.3),transparent 42%),radial-gradient(circle at 92% 88%,rgba(138,63,252,.26),transparent 42%)}
 nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:calc(100% - 24px);max-width:496px;isolation:isolate;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.18));-webkit-backdrop-filter:blur(20px) saturate(1.9);backdrop-filter:blur(20px) saturate(1.9);border:1px solid rgba(255,255,255,.7);border-radius:999px;padding:8px;display:flex;gap:0;box-shadow:0 12px 34px rgba(138,63,252,.25),inset 0 1.5px 1px rgba(255,255,255,.95),inset 0 -1px 2px rgba(255,255,255,.4)}
@@ -117,7 +121,7 @@ button:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
   <div class="card wal"><div><small>Balans</small><b data-bal>$0.00</b><div class="id">ID: <span data-uid></span></div><div class="id" id="dbg"></div></div><button class="add" data-add>Goş</button></div>
 
   <div class="card hero">
-    <div class="globe"></div>
+    <div class="stage"><canvas id="gl" width="440" height="440"></canvas><span class="chip2"><i></i>Goraldy</span><span class="chip2 r">🔒 Şifrlenen</span></div>
     <div class="badge">Premium VPN</div>
     <h2>Çalt we ygtybarly VPN</h2>
     <p>Bir abunalyk — bir minutda birikiň.</p>
@@ -137,8 +141,7 @@ button:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
   </div>
 
   <div class="card list">
-    <div class="item"><div class="ico c4">➤</div><div><b>Kanala goşulyň</b><span>Täzelikler we habarlar</span></div><em>›</em></div>
-    <div class="item"><div class="ico c2">✉</div><div><b>Çata goşulyň</b><span>Soraglar we beýleki ulanyjylar bilen</span></div><em>›</em></div>
+    <div class="item" data-tg="karma_vps"><div class="ico c4">➤</div><div><b>Kanala goşulyň</b><span>Täzelikler we habarlar</span></div><em>›</em></div>
   </div>
 </section>
 
@@ -219,13 +222,14 @@ function theme(){
   r.dataset.theme=dark?"light":"dark";$("#theme").textContent=dark?"☾":"☀";
 }
 document.addEventListener("click",function(e){
-  var t=e.target.closest("[data-p],[data-tab],[data-buy],[data-theme-btn],[data-add],[data-close],[data-refresh],[data-support],#theme");if(!t)return;
+  var t=e.target.closest("[data-p],[data-tab],[data-buy],[data-theme-btn],[data-add],[data-close],[data-refresh],[data-support],[data-tg],#theme");if(!t)return;
   if(t.dataset.p){plan=+t.dataset.p;selPlan()}
   else if(t.dataset.tab)go(t.dataset.tab);
   else if(t.dataset.add!==undefined)addFunds();
   else if(t.dataset.close!==undefined)$("#ov").classList.remove("show");
   else if(t.dataset.refresh!==undefined)loadOrders();
   else if(t.dataset.support!==undefined)support();
+  else if(t.dataset.tg)openTg(t.dataset.tg);
   else if(t.dataset.buy!==undefined)buyClick(t.dataset.buy);
   else theme();
 });
@@ -242,13 +246,17 @@ function showBal(){document.querySelectorAll("[data-bal]").forEach(function(e){e
 function loadBal(){
   var q=new URLSearchParams(location.search).get("bal");if(q&&!API)bal=parseFloat(q)||0;
   dbg("");
-  if(API){fetch(API.replace(/\/+$/,"")+"/balance?id="+encodeURIComponent(uid)+"&init="+encodeURIComponent(tg?tg.initData:"")).then(function(r){return r.json()}).then(function(d){if(d.error)dbg("API: "+d.error);else{bal=+d.balance||0;showBal()}}).catch(function(){dbg("API: baglanti yok")})}
+  if(API){fetch(API.replace(/\/+$/,"")+"/balance?id="+encodeURIComponent(uid)+"&init="+encodeURIComponent(tg?tg.initData:"")).then(function(r){return r.json()}).then(function(d){if(d.error)dbg("API: "+d.error);else{var nb=+d.balance||0;if(lastBal!==null&&nb>lastBal)toast("+$"+(nb-lastBal).toFixed(2)+" goşuldy");lastBal=nb;bal=nb;showBal()}}).catch(function(){dbg("API: baglanti yok")})}
   showBal();
 }
+var lastBal=null,lastOrd=null,lastDone=0;
 function loadOrders(){
   var box=$("#orders"),E='<div class="card empty"><b>Entek ýok</b>Alan abunalyklaryňyz şu ýerde görner.</div>';
   if(!API){box.innerHTML=E;return}
   fetch(API.replace(/\/+$/,"")+"/orders?id="+encodeURIComponent(uid)+"&init="+encodeURIComponent(tg?tg.initData:"")).then(function(r){return r.json()}).then(function(d){
+    var js=JSON.stringify(d.orders||[]);if(js===lastOrd)return;
+    var dn=(d.orders||[]).filter(function(o){return o.status==="done"}).length;
+    if(lastOrd!==null&&dn>lastDone)toast("Täze kod geldi");lastDone=dn;lastOrd=js;
     if(!d.orders||!d.orders.length){box.innerHTML=E;return}
     box.innerHTML="";
     d.orders.forEach(function(o){
@@ -289,6 +297,12 @@ function buyClick(k){
     }).catch(function(){toast("Ýalňyşlyk: baglanti")})
   }else{bal=Math.round((bal-c)*100)/100;showBal();toast(P[plan][0]+" satyn alyndy")}
 }
+function openTg(n){
+  var u="https://t.me/"+n;
+  if(tg&&tg.initData&&tg.openTelegramLink){tg.openTelegramLink(u);return}
+  var w=null;try{w=window.open(u,"_blank")}catch(e){}
+  if(!w){try{location.href="tg://resolve?domain="+n}catch(e){}}
+}
 function support(){
   var u="https://t.me/krakenxhp";
   if(tg&&tg.initData&&tg.openTelegramLink){tg.openTelegramLink(u);return}
@@ -307,7 +321,56 @@ function addFunds(){
   }
 }
 document.addEventListener("visibilitychange",function(){if(!document.hidden)loadBal()});
+setInterval(function(){if(document.hidden||!API)return;loadBal();if($("#mine").classList.contains("on"))loadOrders()},8000);
 loadBal();
+(function(){
+  var cv=document.getElementById("gl");if(!cv||!cv.getContext)return;
+  var x=cv.getContext("2d"),W=cv.width,C=W/2,R=W*0.43,pts=[],N=700,i,rot=0,tilt=-0.38,ct=Math.cos(tilt),st=Math.sin(tilt);
+  var still=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
+  for(i=0;i<N;i++){var y=1-2*(i+.5)/N,r=Math.sqrt(1-y*y),a=i*2.399963;pts.push([Math.cos(a)*r,y,Math.sin(a)*r])}
+  function ll(la,lo){la*=Math.PI/180;lo*=Math.PI/180;return[Math.cos(la)*Math.sin(lo),Math.sin(la),Math.cos(la)*Math.cos(lo)]}
+  var nodes=[ll(52,5),ll(51,10),ll(60,25),ll(55,37),ll(39,33),ll(38,-97),ll(48,2),ll(25,55)];
+  var arcs=[[0,5],[3,7],[1,4],[6,3],[5,2]];
+  function P(p,k){
+    var c=Math.cos(rot),s=Math.sin(rot),x1=p[0]*c+p[2]*s,z1=-p[0]*s+p[2]*c,y2=p[1]*ct-z1*st,z2=p[1]*st+z1*ct;
+    return[C+x1*R*k,C-y2*R*k,z2];
+  }
+  function slerp(a,b,s){
+    var d=Math.max(-1,Math.min(1,a[0]*b[0]+a[1]*b[1]+a[2]*b[2])),o=Math.acos(d),so=Math.sin(o)||1,f=Math.sin((1-s)*o)/so,g=Math.sin(s*o)/so;
+    return[a[0]*f+b[0]*g,a[1]*f+b[1]*g,a[2]*f+b[2]*g];
+  }
+  function arcPt(a,b,s){var v=slerp(a,b,s),k=1+0.25*Math.sin(Math.PI*s);return P(v,k)}
+  function frame(t){
+    if(cv.offsetParent!==null){
+      rot=t*0.00022;
+      x.clearRect(0,0,W,W);
+      var g=x.createRadialGradient(C-R*.35,C-R*.35,R*.1,C,C,R);
+      g.addColorStop(0,"rgba(255,255,255,.30)");g.addColorStop(1,"rgba(255,255,255,.05)");
+      x.globalAlpha=1;x.fillStyle=g;x.beginPath();x.arc(C,C,R,0,6.2832);x.fill();
+      x.strokeStyle="rgba(255,255,255,.5)";x.lineWidth=2;x.stroke();
+      x.fillStyle="#fff";
+      for(i=0;i<N;i++){var q=P(pts[i],1);if(q[2]>0){x.globalAlpha=.2+.7*q[2];x.fillRect(q[0]-1.6,q[1]-1.6,3.2,3.2)}}
+      x.lineWidth=2.5;x.lineCap="round";
+      arcs.forEach(function(e,j){
+        var a=nodes[e[0]],b=nodes[e[1]],pen=false,s,q;
+        x.strokeStyle="#fff";x.globalAlpha=.55;x.beginPath();
+        for(s=0;s<=1.0001;s+=1/28){q=arcPt(a,b,Math.min(s,1));if(q[2]>0.02){if(pen)x.lineTo(q[0],q[1]);else{x.moveTo(q[0],q[1]);pen=true}}else pen=false}
+        x.stroke();
+        var u=((t/2200)+j*.21)%1,d=arcPt(a,b,u);
+        if(d[2]>0.02){x.globalAlpha=1;x.shadowColor="#fff";x.shadowBlur=14;x.beginPath();x.arc(d[0],d[1],5,0,6.2832);x.fillStyle="#fff";x.fill();x.shadowBlur=0}
+      });
+      nodes.forEach(function(n,j){
+        var q=P(n,1);if(q[2]<=0.02)return;
+        var ph=((t/1400)+j*.37)%1;
+        x.globalAlpha=1;x.fillStyle="#fff";x.beginPath();x.arc(q[0],q[1],6,0,6.2832);x.fill();
+        x.globalAlpha=(1-ph)*.7;x.strokeStyle="#fff";x.lineWidth=2.5;x.beginPath();x.arc(q[0],q[1],6+ph*22,0,6.2832);x.stroke();
+      });
+      x.globalAlpha=1;
+    }
+    if(!still)requestAnimationFrame(frame);
+  }
+  if(still)frame(0);else requestAnimationFrame(frame);
+})();
 var D=["Ýekşenbe","Duşenbe","Sişenbe","Çarşenbe","Penşenbe","Anna","Şenbe"],M=["Ýanwar","Fewral","Mart","Aprel","Maý","Iýun","Iýul","Awgust","Sentýabr","Oktýabr","Noýabr","Dekabr"],n=new Date();
 $("#date").textContent=D[n.getDay()]+", "+n.getDate()+" "+M[n.getMonth()];
 if(matchMedia("(prefers-color-scheme:dark)").matches)$("#theme").textContent="☀";
