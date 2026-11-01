@@ -1,0 +1,82 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin</title><style>body{font-family:sans-serif;max-width:460px;margin:24px auto;padding:0 16px}
+input,button,select{width:100%;padding:14px;margin:6px 0;font-size:17px;border-radius:12px;border:1px solid #ccc;box-sizing:border-box}
+button{background:#ff2e7e;color:#fff;border:0;font-weight:700}.c{border:1px solid #ddd;border-radius:14px;padding:12px;margin:10px 0}
+#r{margin-top:10px;font-size:18px}</style></head><body>
+<input id="k" type="password" placeholder="Admin açar">
+<h2>Sargytlar</h2><button onclick="load()">Täzele</button><div id="list"></div>
+<h2>Ulanyjylar</h2><button onclick="users()">Täzele</button><div id="ul"></div>
+<h2>Balans goş</h2>
+<input id="i" inputmode="numeric" placeholder="Ulanyjy ID">
+<input id="a" inputmode="decimal" placeholder="Mukdar ($)">
+<button onclick="add()">Goş</button><div id="r"></div>
+<h2>Promo kodlar</h2>
+<input id="pc" placeholder="KOD (mysal: KRAKEN20)">
+<select id="pk"><option value="pct">% arzanladyş</option><option value="bal">$ bonus (balansa)</option></select>
+<input id="pv" inputmode="decimal" placeholder="Baha (20 ýa-da 0.5)">
+<input id="pu" inputmode="numeric" placeholder="Ulanyş sany (0 = çäksiz)">
+<button onclick="pcreate()">Döret</button><button onclick="plist()" style="background:#555">Sanaw</button><div id="pl"></div>
+<h2>Bot</h2><button onclick="tst()">Bot synagy</button><pre id="t" style="white-space:pre-wrap"></pre>
+<p style="color:#666">Bot komandalary:<br>/kod 12 KOD<br>/yukle ID 5<br>/duyuru TM tekst || RU текст</p>
+<script src="config.js"></script>
+<script>
+const API=(window.API_URL||"").replace(/\/+$/,"");
+async function post(p,b){
+  const r=await fetch(API+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({key:document.getElementById("k").value},b))});
+  return r.json();
+}
+async function load(){
+  const L=document.getElementById("list");L.textContent="...";
+  const d=await post("/admin/orders",{});
+  if(d.error){L.textContent="Ýalňyşlyk: "+d.error;return}
+  if(!d.orders.length){L.textContent="Garaşylýan sargyt ýok";return}
+  L.innerHTML="";
+  d.orders.forEach(function(o){
+    const c=document.createElement("div");c.className="c";
+    c.textContent="#"+o.n+" · ID "+o.id+" · At: "+(o.label||"-")+" · "+o.name+" · $"+o.price+(o.promo?" · "+o.promo:"");
+    const i=document.createElement("input");i.placeholder="VPN kody";
+    const b=document.createElement("button");b.textContent="Ugrat";
+    b.onclick=async function(){const r=await post("/admin/send",{n:o.n,code:i.value});if(r.ok)load();else alert(r.error||"Ýalňyşlyk")};
+    c.append(i,b);L.append(c);
+  });
+}
+async function add(){
+  const d=await post("/admin/add",{id:document.getElementById("i").value,amount:document.getElementById("a").value});
+  document.getElementById("r").textContent=d.ok?("Taýýar. Täze balans: $"+d.balance):("Ýalňyşlyk: "+(d.error||""));
+}
+async function users(){
+  const L=document.getElementById("ul");L.textContent="...";
+  const d=await post("/admin/users",{});
+  if(d.error){L.textContent="Ýalňyşlyk: "+d.error;return}
+  if(!d.users.length){L.textContent="Entek ulanyjy ýok";return}
+  L.innerHTML="";
+  d.users.forEach(function(o){
+    const c=document.createElement("div");c.className="c";
+    const m=Math.round((Date.now()-o.last)/60000);
+    c.textContent="ID "+o.id+" · "+(o.name||"-")+(o.un?" (@"+o.un+")":"")+" · $"+o.balance+" · "+(m<60?m+" min":Math.round(m/60)+" sag")+" öň";
+    const b=document.createElement("button");b.textContent="Balans goş";
+    b.onclick=function(){document.getElementById("i").value=o.id;document.getElementById("a").focus()};
+    c.append(b);L.append(c);
+  });
+}
+async function pcreate(){
+  const d=await post("/admin/promo",{code:document.getElementById("pc").value,kind:document.getElementById("pk").value,value:document.getElementById("pv").value,uses:document.getElementById("pu").value});
+  if(d.error){alert("Ýalňyşlyk: "+d.error);return}
+  plist();
+}
+async function plist(){
+  const L=document.getElementById("pl");L.textContent="...";
+  const d=await post("/admin/promos",{});
+  if(d.error){L.textContent="Ýalňyşlyk: "+d.error;return}
+  if(!d.promos.length){L.textContent="Promo kod ýok";return}
+  L.innerHTML="";
+  d.promos.forEach(function(o){
+    const c=document.createElement("div");c.className="c";
+    c.textContent=o.code+" · "+(o.kind==="pct"?"-"+o.value+"%":"+$"+o.value)+" · galan: "+(o.left<0?"çäksiz":o.left);
+    const b=document.createElement("button");b.textContent="Poz";
+    b.onclick=async function(){await post("/admin/promo/del",{code:o.code});plist()};
+    c.append(b);L.append(c);
+  });
+}
+async function tst(){const d=await post("/admin/test",{});document.getElementById("t").textContent=JSON.stringify(d,null,1)}
+</script></body></html>
