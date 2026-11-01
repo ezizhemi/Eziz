@@ -4,6 +4,7 @@ input,button,select{width:100%;padding:14px;margin:6px 0;font-size:17px;border-r
 button{background:#ff2e7e;color:#fff;border:0;font-weight:700}.c{border:1px solid #ddd;border-radius:14px;padding:12px;margin:10px 0}
 #r{margin-top:10px;font-size:18px}</style></head><body>
 <input id="k" type="password" placeholder="Admin açar">
+<p id="api" style="color:#666;font-size:13px;word-break:break-all"></p>
 <h2>Sargytlar</h2><button onclick="load()">Täzele</button><div id="list"></div>
 <h2>Ulanyjylar</h2><button onclick="users()">Täzele</button><div id="ul"></div>
 <h2>Balans goş</h2>
@@ -21,9 +22,13 @@ button{background:#ff2e7e;color:#fff;border:0;font-weight:700}.c{border:1px soli
 <script src="config.js"></script>
 <script>
 const API=(window.API_URL||"").replace(/\/+$/,"");
+document.getElementById("api").textContent="API: "+(API||"(boş — config.js tapylmady ýa-da API_URL ýok)");
 async function post(p,b){
-  const r=await fetch(API+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({key:document.getElementById("k").value},b))});
-  return r.json();
+  try{
+    const r=await fetch(API+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({key:document.getElementById("k").value},b))});
+    const t=await r.text();
+    try{return JSON.parse(t)}catch(e){return {error:"jogap ýalňyş ("+r.status+"): "+t.slice(0,50)}}
+  }catch(e){return {error:"baglanti ýok: "+e.message}}
 }
 async function load(){
   const L=document.getElementById("list");L.textContent="...";
