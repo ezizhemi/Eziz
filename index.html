@@ -83,6 +83,7 @@ h1{font-size:34px;font-weight:800;letter-spacing:-1.2px}
 @keyframes pl{0%{box-shadow:0 0 0 0 rgba(124,255,178,.7)}70%,100%{box-shadow:0 0 0 8px rgba(124,255,178,0)}}
 .row2{display:flex;gap:8px;margin-bottom:12px}.row2 .inp{margin:0;flex:1;min-width:0;text-transform:uppercase}.row2 .btn{width:auto;padding:0 20px;font-size:15px}
 @media (max-width:380px){h1{font-size:28px}.circle{width:40px;height:40px}.tools{gap:8px}}
+.cp.alt{background:var(--bg);color:var(--text);border:1px solid var(--line);margin-left:8px}
 .view{display:none}.view.on{display:block}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at 12% 92%,rgba(255,122,61,.3),transparent 42%),radial-gradient(circle at 92% 88%,rgba(138,63,252,.26),transparent 42%)}
 #bg::before{left:-18vmax;bottom:-8vmax;background:radial-gradient(circle,#ff7a3d,transparent 66%)}
@@ -180,7 +181,7 @@ button:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
   <div class="card prof"><div class="circle logo"></div><div><b style="font-size:19px" data-uname>Myhman</b><br><span style="font-size:14px;color:var(--muted)">ID: <span data-uid></span> · <span data-bal>$0.00</span></span></div></div>
   <div class="card" id="refcard" style="display:none;margin-bottom:12px">
     <b style="font-size:18px">Dostuňy çagyr</b>
-    <p style="font-size:14px;color:var(--muted);margin:6px 0 10px;line-height:1.4">Dostuňyz ilkinji satyn alanda ikiňize hem +$0.25 bonus.</p>
+    <p style="font-size:14px;color:var(--muted);margin:6px 0 10px;line-height:1.4">Dostuňyz ilkinji satyn alanda ikiňize hem +$0.15 bonus.</p>
     <div style="font-size:14px;margin-bottom:12px">Çagyrylanlar: <b id="rn">0</b> · Gazanç: $<b id="re">0.00</b></div>
     <button class="btn solid" data-invite>Çagyrmak</button>
   </div>
@@ -216,7 +217,7 @@ function movePlan(anim){
   if(anim){p.classList.remove("sq");void p.offsetWidth;p.classList.add("sq")}
   else{void p.offsetWidth;p.style.transition=""}
 }
-function toast(t){var e=$("#toast");e.textContent=t;e.classList.add("show");setTimeout(function(){e.classList.remove("show")},1800)}
+function toast(t){var e=$("#toast");e.textContent=t;e.classList.add("show");setTimeout(function(){e.classList.remove("show")},2800)}
 function go(id){
   document.querySelectorAll(".view").forEach(function(v){v.classList.toggle("on",v.id===id)});
   document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.tab===id)});
@@ -260,7 +261,7 @@ if(!uid){try{uid=localStorage.getItem("uid")||""}catch(e){}
   if(!uid){uid=String(Math.floor(10000000+Math.random()*90000000));try{localStorage.setItem("uid",uid)}catch(e){}}}
 document.querySelectorAll("[data-uid]").forEach(function(e){e.textContent=uid});
 function dbg(t){var e=$("#dbg");if(e)e.textContent=(tg&&tg.initData?"TG ok":"TG yok")+(t?" · "+t:"")}
-var RU={"Balans": "Баланс", "Goş": "Пополнить", "Goraldy": "Защищено", "🔒 Şifrlenen": "🔒 Шифрование", "Çalt we ygtybarly VPN": "Быстрый и надёжный VPN", "Bir abunalyk — bir minutda birikiň.": "Одна подписка — подключение за минуту.", "Abunalyk almak": "Купить подписку", "Başlangyç baha: $0.50 (≈ 10 TMT) · 1 gün": "Старт от $0.50 (≈ 10 TMT) · 1 день", "Howpsuz": "Безопасно", "şifrlenen birikme": "шифрованное соединение", "Derrew": "Мгновенно", "tölegden soň salgy": "доступ после оплаты", "Goldaw": "Поддержка", "Amatly töleg": "Удобная оплата", "CryptoBot · Binance Pay · Manat": "CryptoBot · Binance Pay · Манат", "Kanala goşulyň": "Подписаться на канал", "Täzelikler we habarlar": "Новости и объявления", "Baş sahypa": "Главная", "Abunalyklar": "Подписки", "Aksiýalar": "Акции", "Alynanlar": "Покупки", "Profil": "Профиль", "Abunalyk": "Подписка", "Tarif saýlaň": "Выберите тариф", "1 gün": "1 день", "3 gün": "3 дня", "6 gün": "6 дней", "1 aý": "1 месяц", "Günde $0.50": "$0.50 в день", "50% arzanladyş": "Скидка 50%", "Günde $0.33": "$0.33 в день", "Günde $0.15": "$0.15 в день", "Amatly": "Выгодно", "Promo kod": "Промокод", "Ulanmak": "Применить", "At": "Имя", "Satyn almak": "Купить", "Aksiýa": "Акция", "−50% arzanladyş": "Скидка −50%", "3 günlük tarifde −50% arzanladyş.": "Скидка −50% на тариф «3 дня».", "Aksiýany ulanmak": "Использовать акцию", "Başga aksiýa ýok": "Других акций нет", "Täze kampaniýalar üçin kanala gözegçilik ediň.": "Следите за каналом, чтобы не пропустить новые акции.", "Alynan abunalyklar": "Мои покупки", "Täzelemek": "Обновить", "Entek ýok": "Пока пусто", "Alan abunalyklaryňyz şu ýerde görner.": "Здесь появятся ваши подписки.", "Taýýar": "Готово", "Garaşylýar": "Ожидание", "Kod tiz wagtda iberiler.": "Код скоро будет отправлен.", "Göçürmek": "Копировать", "Dowam etmek": "Продлить", "Ýalňyşlyk": "Ошибка", "Täzeden synanyşyň.": "Попробуйте ещё раз.", "Myhman": "Гость", "Tema": "Тема", "Ýagty / garaňky": "Светлая / тёмная", "Balans ýeterlik däl": "Недостаточно средств", "Ýapmak": "Закрыть", "Gerek": "Нужно", "Balansyňyz": "Ваш баланс", "At ýazyň": "Введите имя", "satyn alyndy": "куплено", "goşuldy": "зачислено", "Täze kod geldi": "Пришёл новый код", "Göçürildi": "Скопировано", "Promo kod ýalňyş": "Неверный промокод", "Bu kody eýýäm ulandyňyz": "Вы уже использовали этот код", "Dostuňy çagyr": "Пригласи друга", "Dostuňyz ilkinji satyn alanda ikiňize hem +$0.25 bonus.": "Когда друг сделает первую покупку, вы оба получите +$0.25.", "Çagyrylanlar:": "Приглашено:", "· Gazanç: $": "· Заработано: $", "Çagyrmak": "Пригласить"};
+var RU={"Balans": "Баланс", "Goş": "Пополнить", "Goraldy": "Защищено", "🔒 Şifrlenen": "🔒 Шифрование", "Çalt we ygtybarly VPN": "Быстрый и надёжный VPN", "Bir abunalyk — bir minutda birikiň.": "Одна подписка — подключение за минуту.", "Abunalyk almak": "Купить подписку", "Başlangyç baha: $0.50 (≈ 10 TMT) · 1 gün": "Старт от $0.50 (≈ 10 TMT) · 1 день", "Howpsuz": "Безопасно", "şifrlenen birikme": "шифрованное соединение", "Derrew": "Мгновенно", "tölegden soň salgy": "доступ после оплаты", "Goldaw": "Поддержка", "Amatly töleg": "Удобная оплата", "CryptoBot · Binance Pay · Manat": "CryptoBot · Binance Pay · Манат", "Kanala goşulyň": "Подписаться на канал", "Täzelikler we habarlar": "Новости и объявления", "Baş sahypa": "Главная", "Abunalyklar": "Подписки", "Aksiýalar": "Акции", "Alynanlar": "Покупки", "Profil": "Профиль", "Abunalyk": "Подписка", "Tarif saýlaň": "Выберите тариф", "1 gün": "1 день", "3 gün": "3 дня", "6 gün": "6 дней", "1 aý": "1 месяц", "Günde $0.50": "$0.50 в день", "50% arzanladyş": "Скидка 50%", "Günde $0.33": "$0.33 в день", "Günde $0.15": "$0.15 в день", "Amatly": "Выгодно", "Promo kod": "Промокод", "Ulanmak": "Применить", "At": "Имя", "Satyn almak": "Купить", "Aksiýa": "Акция", "−50% arzanladyş": "Скидка −50%", "3 günlük tarifde −50% arzanladyş.": "Скидка −50% на тариф «3 дня».", "Aksiýany ulanmak": "Использовать акцию", "Başga aksiýa ýok": "Других акций нет", "Täze kampaniýalar üçin kanala gözegçilik ediň.": "Следите за каналом, чтобы не пропустить новые акции.", "Alynan abunalyklar": "Мои покупки", "Täzelemek": "Обновить", "Entek ýok": "Пока пусто", "Alan abunalyklaryňyz şu ýerde görner.": "Здесь появятся ваши подписки.", "Taýýar": "Готово", "Garaşylýar": "Ожидание", "Kod tiz wagtda iberiler.": "Код скоро будет отправлен.", "Göçürmek": "Копировать", "Dowam etmek": "Продлить", "Ýalňyşlyk": "Ошибка", "Täzeden synanyşyň.": "Попробуйте ещё раз.", "Myhman": "Гость", "Tema": "Тема", "Ýagty / garaňky": "Светлая / тёмная", "Balans ýeterlik däl": "Недостаточно средств", "Ýapmak": "Закрыть", "Gerek": "Нужно", "Balansyňyz": "Ваш баланс", "At ýazyň": "Введите имя", "satyn alyndy": "куплено", "goşuldy": "зачислено", "Täze kod geldi": "Пришёл новый код", "Göçürildi": "Скопировано", "Promo kod ýalňyş": "Неверный промокод", "Bu kody eýýäm ulandyňyz": "Вы уже использовали этот код", "Dostuňy çagyr": "Пригласи друга", "Dostuňyz ilkinji satyn alanda ikiňize hem +$0.15 bonus.": "Когда друг сделает первую покупку, вы оба получите +$0.15.", "Çagyrylanlar:": "Приглашено:", "· Gazanç: $": "· Заработано: $", "Çagyrmak": "Пригласить", "Promo kod ýazyň": "Введите промокод", "Aýyr": "Удалить", "Aýyrmalymy?": "Удалить из списка?", "Aýryldy": "Удалено"};
 var lang="";
 try{lang=localStorage.getItem("lang")||""}catch(e){}
 if(!lang)lang=(tu&&tu.language_code==="ru")?"ru":"tk";
@@ -291,12 +292,15 @@ function apiPost(path,body){
   return fetch(API.replace(/\/+$/,"")+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({id:uid,init:tg?tg.initData:""},body))}).then(function(r){return r.json()});
 }
 function applyPromo(){
-  var c=($("#promo").value||"").trim().toUpperCase();if(!c||!API)return;
+  var c=($("#promo").value||"").trim().toUpperCase();
+  if(!c){toast(tr("Promo kod ýazyň"));$("#promo").focus();return}
+  if(!API){toast(tr("Ýalňyşlyk")+": API");return}
   apiPost("/promo",{code:c}).then(function(d){
     if(d.ok&&d.kind==="bal"){bal=+d.balance||0;lastBal=bal;showBal();toast("+$"+Number(d.value).toFixed(2)+" "+tr("goşuldy"));$("#promo").value=""}
     else if(d.ok&&d.kind==="pct"){disc=+d.value;promoCode=c;draw();movePlan(false);applyLang($("#plans"));toast("−"+d.value+"%")}
-    else toast(tr(d.error==="used"?"Bu kody eýýäm ulandyňyz":"Promo kod ýalňyş"));
-  }).catch(function(){toast(tr("Ýalňyşlyk")+": baglanti")});
+    else if(d.error==="used"||d.error==="promo")toast(tr(d.error==="used"?"Bu kody eýýäm ulandyňyz":"Promo kod ýalňyş"));
+    else toast(tr("Ýalňyşlyk")+": "+(d.error||"?"));
+  }).catch(function(){toast(tr("Ýalňyşlyk")+": Worker täzelenmedi (Deploy)")});
 }
 function invite(){
   var link=(window.REF_BASE||"")+"?startapp=ref_"+uid;
@@ -323,10 +327,18 @@ function loadBal(){
   showBal();
 }
 var lastBal=null,lastOrd=null,lastDone=0;
+function hidSet(){try{return JSON.parse(localStorage.getItem("hid")||"{}")}catch(e){return{}}}
+function ask(m,cb){if(tg&&tg.initData&&tg.showConfirm){tg.showConfirm(m,function(ok){if(ok)cb()})}else if(confirm(m))cb()}
+function hideOrder(n){
+  var h=hidSet();h[n]=1;try{localStorage.setItem("hid",JSON.stringify(h))}catch(e){}
+  if(API)apiPost("/order/hide",{n:n}).catch(function(){});
+  lastOrd=null;toast(tr("Aýryldy"));loadOrders();
+}
 function loadOrders(){
   var box=$("#orders"),E='<div class="card empty"><b>Entek ýok</b>Alan abunalyklaryňyz şu ýerde görner.</div>';
   if(!API){box.innerHTML=E;applyLang(box);return}
   fetch(API.replace(/\/+$/,"")+"/orders?id="+encodeURIComponent(uid)+"&init="+encodeURIComponent(tg?tg.initData:"")).then(function(r){return r.json()}).then(function(d){
+    var hid=hidSet();d.orders=(d.orders||[]).filter(function(o){return !hid[o.n]});
     var js=JSON.stringify(d.orders||[])+Math.floor(Date.now()/60000)+lang;if(js===lastOrd)return;
     var dn=(d.orders||[]).filter(function(o){return o.status==="done"}).length;
     if(lastOrd!==null&&dn>lastDone)toast(tr("Täze kod geldi"));lastDone=dn;lastOrd=js;
@@ -346,6 +358,8 @@ function loadOrders(){
         var k=document.createElement("code");k.textContent=o.code;c.append(k);
         var cb=document.createElement("button");cb.className="cp";cb.textContent="Göçürmek";
         cb.onclick=function(){try{navigator.clipboard.writeText(o.code)}catch(e){}toast(tr("Göçürildi"))};c.append(cb);
+        var rm=document.createElement("button");rm.className="cp alt";rm.textContent="Aýyr";
+        rm.onclick=function(){ask(tr("Aýyrmalymy?"),function(){hideOrder(o.n)})};c.append(rm);
         if(o.exp)expiry(c,o);
       }else{
         var p=document.createElement("p");p.style.cssText="margin-top:10px;font-size:14px;color:var(--muted)";p.textContent="Kod tiz wagtda iberiler.";c.append(p);
