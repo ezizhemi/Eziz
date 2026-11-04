@@ -10,13 +10,19 @@ button{background:#ff2e7e;color:#fff;border:0;font-weight:700}.c{border:1px soli
 <h2>Balans goş</h2>
 <input id="i" inputmode="numeric" placeholder="Ulanyjy ID">
 <input id="a" inputmode="decimal" placeholder="Mukdar ($)">
-<button onclick="add()">Goş</button><div id="r"></div>
+<div style="display:flex;gap:8px"><button onclick="add(1)">Goş (+)</button><button onclick="add(-1)" style="background:#555">Aýyr (−)</button></div><div id="r"></div>
 <h2>Promo kodlar</h2>
 <input id="pc" placeholder="KOD (mysal: KRAKEN20)">
 <select id="pk"><option value="pct">% arzanladyş</option><option value="bal">$ bonus (balansa)</option></select>
 <input id="pv" inputmode="decimal" placeholder="Baha (20 ýa-da 0.5)">
 <input id="pu" inputmode="numeric" placeholder="Ulanyş sany (0 = çäksiz)">
 <button onclick="pcreate()">Döret</button><button onclick="plist()" style="background:#555">Sanaw</button><div id="pl"></div>
+<h2>Reklama</h2>
+<input id="at" placeholder="Başlyk (title)" maxlength="60">
+<input id="al" placeholder="Salgy (islege görä): https://t.me/...">
+<input id="af" type="file" accept="image/*">
+<img id="ap" alt="" style="display:none;width:100%;border-radius:14px;margin:6px 0">
+<button onclick="adadd()">Reklama goş</button><div id="am" style="margin:8px 0"></div><div id="adl"></div>
 <h2>Bot</h2><button onclick="tst()">Bot synagy</button><pre id="t" style="white-space:pre-wrap"></pre>
 <p style="color:#666">Bot komandalary:<br>/kod 12 KOD<br>/yukle ID 5<br>/duyuru TM tekst || RU текст</p>
 <script src="config.js"></script>
@@ -45,9 +51,19 @@ async function load(){
     c.append(i,b);L.append(c);
   });
 }
-async function add(){
-  const d=await post("/admin/add",{id:document.getElementById("i").value,amount:document.getElementById("a").value});
-  document.getElementById("r").textContent=d.ok?("Taýýar. Täze balans: $"+d.balance):("Ýalňyşlyk: "+(d.error||""));
+async function adj(id,sign){
+  const v=prompt((sign<0?"Näçe $ aýyrmaly":"Näçe $ goşmaly")+"? (ID "+id+")");
+  if(v===null||v==="")return;
+  document.getElementById("i").value=id;document.getElementById("a").value=v.replace(",",".");
+  await add(sign,true);users();
+}
+async function add(sign,skip){
+  const raw=parseFloat(document.getElementById("a").value),id=document.getElementById("i").value.trim(),R=document.getElementById("r");
+  if(!id||!isFinite(raw)||raw<=0){R.textContent="ID we mukdary dogry ýazyň";return}
+  if(sign<0&&!skip&&!confirm("ID "+id+" balansyndan $"+raw+" aýyrmalymy?"))return;
+  const d=await post("/admin/add",{id:id,amount:String(sign*raw)});
+  if(d.ok&&d.balance<0){const f=await post("/admin/add",{id:id,amount:String(-d.balance)});if(f.ok)d.balance=f.balance}
+  R.textContent=d.ok?((sign<0?"Aýyryldy. ":"Goşuldy. ")+"Täze balans: $"+d.balance):("Ýalňyşlyk: "+(d.error||""));
 }
 async function users(){
   const L=document.getElementById("ul");L.textContent="...";
@@ -59,9 +75,12 @@ async function users(){
     const c=document.createElement("div");c.className="c";
     const m=Math.round((Date.now()-o.last)/60000);
     c.textContent="ID "+o.id+" · "+(o.name||"-")+(o.un?" (@"+o.un+")":"")+" · $"+o.balance+" · "+(m<60?m+" min":Math.round(m/60)+" sag")+" öň";
+    const row=document.createElement("div");row.style.cssText="display:flex;gap:8px";
     const b=document.createElement("button");b.textContent="Balans goş";
-    b.onclick=function(){document.getElementById("i").value=o.id;document.getElementById("a").focus()};
-    c.append(b);L.append(c);
+    b.onclick=function(){adj(o.id,1)};
+    const m2=document.createElement("button");m2.textContent="Balans aýyr";m2.style.background="#555";
+    m2.onclick=function(){adj(o.id,-1)};
+    row.append(b,m2);c.append(row);L.append(c);
   });
 }
 async function pcreate(){
@@ -83,5 +102,55 @@ async function plist(){
     c.append(b);L.append(c);
   });
 }
+let adImg="";
+function cropImg(file){
+  return new Promise(function(res,rej){
+    const fr=new FileReader();
+    fr.onload=function(){
+      const im=new Image();
+      im.onload=function(){
+        const W=900,H=506,r=16/9;let sw=im.width,sh=im.height,sx=0,sy=0;
+        if(sw/sh>r){sw=sh*r;sx=(im.width-sw)/2}else{sh=sw/r;sy=(im.height-sh)/2}
+        const c=document.createElement("canvas");c.width=W;c.height=H;
+        c.getContext("2d").drawImage(im,sx,sy,sw,sh,0,0,W,H);
+        res(c.toDataURL("image/jpeg",0.82));
+      };
+      im.onerror=rej;im.src=fr.result;
+    };
+    fr.onerror=rej;fr.readAsDataURL(file);
+  });
+}
+document.getElementById("af").addEventListener("change",async function(e){
+  const f=e.target.files[0];if(!f)return;
+  try{adImg=await cropImg(f);const p=document.getElementById("ap");p.src=adImg;p.style.display="block"}
+  catch(err){document.getElementById("am").textContent="Surat okalmady"}
+});
+async function adadd(){
+  const M=document.getElementById("am");
+  if(!adImg){M.textContent="Surat saýlaň";return}
+  M.textContent="...";
+  const d=await post("/ad/add",{title:document.getElementById("at").value,link:document.getElementById("al").value,img:adImg});
+  if(d.error){M.textContent="Ýalňyşlyk: "+d.error;return}
+  M.textContent="Reklama goşuldy ✅";
+  adImg="";["at","al","af"].forEach(function(i){document.getElementById(i).value=""});
+  document.getElementById("ap").style.display="none";adlist();
+}
+async function adlist(){
+  const L=document.getElementById("adl");
+  try{
+    const r=await fetch(API+"/ads"),d=await r.json();
+    L.innerHTML="";
+    if(!d.ads.length){L.textContent="Reklama ýok";return}
+    d.ads.forEach(function(a){
+      const c=document.createElement("div");c.className="c";
+      const im=document.createElement("img");im.src=API+"/ad-img/"+a.id+"?v="+a.ts;im.style.cssText="width:100%;border-radius:10px;display:block";
+      const t=document.createElement("div");t.textContent=a.title+(a.link?" → "+a.link:"");t.style.margin="8px 0";
+      const b=document.createElement("button");b.textContent="Poz";
+      b.onclick=async function(){if(!confirm("Pozmalymy?"))return;await post("/ad/del",{id:a.id});adlist()};
+      c.append(im,t,b);L.append(c);
+    });
+  }catch(e){L.textContent="Reklama sanawy açylmady: "+e.message}
+}
 async function tst(){const d=await post("/admin/test",{});document.getElementById("t").textContent=JSON.stringify(d,null,1)}
+adlist();
 </script></body></html>
